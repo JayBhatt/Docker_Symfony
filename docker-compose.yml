@@ -1,0 +1,58 @@
+version: '2'
+services:
+    php:
+        build: ./etc/php/
+        volumes:
+          - ./etc/php/config/php.ini:/etc/php/7.1/fpm/php.ini
+          - ./etc/php/config/www.conf:/etc/php/7.1/fpm/pool.d/www.conf
+          - ./etc/php/config/php-fpm.conf:/etc/php/7.1/fpm/php-fpm.conf
+          - ./etc/php/logs/php-fpm.log:/var/log/php-fpm.log 
+          - ./etc/php/logs/fpm-php.www.log:/var/log/fpm-php.www.log
+          - ./source/:/var/www/html/
+        expose:
+          - 9000
+        ports:
+          - "9000:9000"
+        links:
+          - mysql
+
+    apache2:
+        build: ./etc/apache/
+        volumes:
+          - ./source/:/var/www/html/
+          - ./etc/apache/config/sites-enabled/:/etc/apache2/sites-enabled/
+          - ./etc/apache/config/conf-enabled/:/etc/apache2/conf-enabled/
+          - ./etc/apache/logs/error.log:/var/log/apache2/error.log
+          - ./etc/apache/logs/access.log:/var/log/apache2/access.log
+          - ./etc/apache/logs/sm-error.log:/var/log/apache2/sm-error.log
+          - ./etc/apache/logs/sm-access.log:/var/log/apache2/sm-access.log
+        expose:
+          - 80
+          - 443
+        ports:
+          - "8080:80"
+          - "443:443"
+        links:
+          - php
+
+    mysql:
+        image: mysql:latest
+        volumes:
+          - ./etc/mysql/data/:/var/lib/mysql/
+          - ./etc/mysql/config/:/etc/mysql/conf.d/
+        ports:
+          - "3307:3306"
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: spending_manager
+            MYSQL_USER: spadmin
+            MYSQL_PASSWORD: root
+
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        ports:
+            - "8081:80"
+        links:
+            - mysql
+        environment:
+            PMA_HOST: mysql

@@ -1,0 +1,3 @@
+Follow this link to install Symfony into this folder.
+
+https://symfony.com/doc/current/setup.html
